@@ -1,6 +1,6 @@
 # Ask the Menu
 
-Парсер цифрових меню і підказка «що поїсти». Без API-ключів: дані з публічних сторінок ChoiceQR, Expirenza і Glovo.
+Парсер цифрових меню і підказка «що поїсти». Без API-ключів: дані з публічних сторінок ChoiceQR, Expirenza, Glovo і Duck Hub.
 
 ## Що вміє
 
@@ -14,12 +14,14 @@
 | **ChoiceQR** | [MIRO CAFE](https://miro.vn.ua/section:snidanki) (`miro.vn.ua`, `*.choiceqr.com`) |
 | **Expirenza** (`expz.menu`) | [LongShot](https://expz.menu/order/921775e1-69a8-496d-8739-0293dd0cdcf5/menu?menuId=20141&tableCode=QZ2EJ) — JSON з `static.shaketopay.com.ua/menu/prod/cache/menu/<restaurantId>/uk/` |
 | **Glovo** | [McDonald's Вінниця](https://glovoapp.com/uk/ua/vinnytsia/stores/mcdonald-s-vnt) |
+| **Duck Hub** | [Woods Вінниця](https://woods.duck-hub.com/menu) |
 
 У репозиторії вже є зліпки:
 
 - `data/miro.json` / `data/miro.md` — MIRO CAFE, Вінниця, Келецька 57
 - `data/longshot.json` / `data/longshot.md` — LongShot, Вінниця, Юності 18
 - `data/mcdonalds.json` / `data/mcdonalds.md` — McDonald's, Вінниця (Glovo)
+- `data/woods.json` / `data/woods.md` — Woods, Вінниця, Політехнічна 10а
 
 ## Встановлення
 
@@ -41,6 +43,8 @@ python parse_menu.py \
 python parse_menu.py \
   "https://glovoapp.com/uk/ua/vinnytsia/stores/mcdonald-s-vnt" \
   -n mcdonalds
+
+python parse_menu.py https://woods.duck-hub.com/menu -n woods
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.

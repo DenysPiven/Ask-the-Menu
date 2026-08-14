@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parse a restaurant menu from ChoiceQR or Expirenza (expz.menu) into JSON + Markdown."""
+"""Parse a restaurant menu from ChoiceQR, Expirenza, Glovo or Duck Hub into JSON + Markdown."""
 
 from __future__ import annotations
 
@@ -591,6 +591,132 @@ def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
     }
 
 
+def extract_json_after_key(text: str, key: str) -> Any:
+    """Pull a JSON value that follows `"key":` in an RSC dump."""
+    needle = f'"{key}":'
+    start = text.find(needle)
+    if start < 0:
+        raise ParseError(f"Немає поля {key} у сторінці меню")
+    i = start + len(needle)
+    while i < len(text) and text[i] in " \t\n":
+        i += 1
+    if i >= len(text) or text[i] not in "{[":
+        raise ParseError(f"Поле {key} не є об'єктом/масивом")
+    opener = text[i]
+    closer = "}" if opener == "{" else "]"
+    depth = 0
+    in_str = False
+    esc = False
+    for j, ch in enumerate(text[i:], i):
+        if in_str:
+            if esc:
+                esc = False
+            elif ch == "\\":
+                esc = True
+            elif ch == '"':
+                in_str = False
+            continue
+        if ch == '"':
+            in_str = True
+            continue
+        if ch == opener:
+            depth += 1
+        elif ch == closer:
+            depth -= 1
+            if depth == 0:
+                return json.loads(text[i : j + 1])
+    raise ParseError(f"Не вдалося розібрати JSON для {key}")
+
+
+DUCKHUB_DAYS = {
+    "monday": "Пн",
+    "tuesday": "Вт",
+    "wednesday": "Ср",
+    "thursday": "Чт",
+    "friday": "Пт",
+    "saturday": "Сб",
+    "sunday": "Нд",
+}
+
+
+def duckhub_weight(amount: Any, unit: str | None) -> str | None:
+    if amount in (None, "", 0):
+        return None
+    u = (unit or "").upper()
+    suffix = {"G": "g", "ML": "ml", "PCS": "шт", "PC": "шт"}.get(u, u.lower() if u else "")
+    return f"{amount}{suffix}" if suffix else str(amount)
+
+
+def parse_duckhub(http: requests.Session, url: str) -> dict[str, Any]:
+    response = http.get(url, timeout=TIMEOUT)
+    response.raise_for_status()
+    text = glovo_rsc_text(response.text)
+    if not text:
+        raise ParseError("Сторінка Duck Hub без каталогу (__next_f)")
+    categories = extract_json_after_key(text, "categories")
+    try:
+        settings = extract_json_after_key(text, "settings")
+    except ParseError:
+        settings = {}
+    if not isinstance(categories, list):
+        raise ParseError("Duck Hub: categories не список")
+
+    items: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for cat in categories:
+        section = html_text((cat or {}).get("name"))
+        for raw in (cat or {}).get("products") or []:
+            item_id = str(raw.get("id") or "")
+            name = html_text(raw.get("name"))
+            if not name or (item_id and item_id in seen):
+                continue
+            if item_id:
+                seen.add(item_id)
+            items.append(
+                {
+                    "id": item_id or None,
+                    "section": section or "Меню",
+                    "category": section or "Меню",
+                    "name": name,
+                    "description": html_text(raw.get("description")),
+                    "price": money_uah(raw.get("priceMinor"), kopecks=True),
+                    "weight": duckhub_weight(raw.get("amount"), raw.get("unit")),
+                    "available": True,
+                    "allergens": [],
+                    "tags": [],
+                    "kcal": None,
+                    "options": [],
+                }
+            )
+    if not items:
+        raise ParseError("У Duck Hub не знайдено позицій меню")
+
+    hours_rows: list[tuple[str, str, str]] = []
+    for row in settings.get("schedule") or []:
+        if not row.get("isOpen"):
+            continue
+        day = DUCKHUB_DAYS.get(str(row.get("day") or "").lower(), str(row.get("day") or ""))
+        hours_rows.append((day, hhmm(row.get("openTime")), hhmm(row.get("closeTime"))))
+
+    clean = url.split("?")[0]
+    return {
+        "source": "duckhub",
+        "url": clean,
+        "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "place": {
+            "name": settings.get("name") or "Woods",
+            "type": settings.get("cuisineType") or "restaurant",
+            "address": settings.get("address") or "",
+            "city": "Vinnytsia" if "Вінниц" in str(settings.get("address") or "") else "",
+            "phone": settings.get("phone") or "",
+            "instagram": settings.get("instagramUrl") or "",
+            "currency": "₴",
+        },
+        "hours": compress_hours(hours_rows),
+        "items": items,
+    }
+
+
 # ---------------------------------------------------------------------------
 # Markdown
 # ---------------------------------------------------------------------------
@@ -659,6 +785,8 @@ def detect_and_parse(http: requests.Session, url: str, lang: str) -> dict[str, A
         return parse_expirenza(http, url, lang)
     if "glovoapp.com" in urlparse(url).netloc.lower():
         return parse_glovo(http, url)
+    if "duck-hub.com" in urlparse(url).netloc.lower():
+        return parse_duckhub(http, url)
 
     response = http.get(url, timeout=TIMEOUT)
     response.raise_for_status()
@@ -668,14 +796,14 @@ def detect_and_parse(http: requests.Session, url: str, lang: str) -> dict[str, A
     if expirenza_restaurant_id(url):
         return parse_expirenza(http, url, lang)
     raise ParseError(
-        "Не впізнано джерело. Підтримуються ChoiceQR, Expirenza (expz.menu) "
-        "та Glovo (glovoapp.com)."
+        "Не впізнано джерело. Підтримуються ChoiceQR, Expirenza (expz.menu), "
+        "Glovo (glovoapp.com) та Duck Hub (*.duck-hub.com)."
     )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Парсить меню ChoiceQR, Expirenza або Glovo у data/<name>.json та .md"
+        description="Парсить меню ChoiceQR, Expirenza, Glovo або Duck Hub у data/<name>.json та .md"
     )
     parser.add_argument("url", help="URL цифрового меню")
     parser.add_argument("-n", "--name", required=True, help="ім'я файлів у data/, напр. miro")
