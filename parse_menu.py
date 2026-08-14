@@ -478,21 +478,22 @@ def glovo_rsc_text(html: str) -> str:
 
 
 def glovo_category(name: str, description: str) -> str:
+    n = name.casefold()
     blob = f"{name} {description}".casefold()
     if "благодійн" in blob:
         return "Благодійність"
-    if "хеппі" in blob or "іграшка" in blob or blob.startswith("книга"):
+    if "хеппі" in n or "іграшка" in n or n.startswith("книга"):
         return "Хеппі Міл"
-    if any(x in blob for x in ("салат",)):
+    if "салат" in n:
         return "Салати"
-    if any(x in blob for x in ("рол",)):
+    if "рол" in n:
         return "Роли"
-    if any(x in blob for x in ("нагетс", "стріпс", "крильц", "чікен бокс")):
+    if any(x in n for x in ("нагетс", "стріпс", "крильц", "чікен бокс")):
         return "Курка"
-    if any(x in blob for x in ("фрі", "картопл", "соус", "мед", "вівсян")):
+    if any(x in n for x in ("фрі", "картопл", "соус", "мед", "вівсян")):
         return "Картопля, каша та соуси"
     if any(
-        x in blob
+        x in n
         for x in (
             "флурі",
             "санд",
@@ -501,26 +502,17 @@ def glovo_category(name: str, description: str) -> str:
             "мафін",
             "круасан",
             "попс",
-            "морозив",
             "grimace",
         )
     ):
         return "Десерти"
     if any(
-        x in blob
-        for x in (
-            "кола",
-            "фанта",
-            "спрайт",
-            "сік",
-            "вода",
-            "mcfizz",
-            "айс ",
-        )
+        x in n
+        for x in ("кола", "фанта", "спрайт", "сік", "вода", "mcfizz", "айс")
     ):
         return "Холодні напої"
     if any(
-        x in blob
+        x in n
         for x in ("американо", "лате", "капуч", "мокко", "чай", "флет", "какао", "еспресо")
     ):
         return "Кава та чай"
