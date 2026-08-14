@@ -444,6 +444,162 @@ def parse_expirenza(http: requests.Session, url: str, lang: str) -> dict[str, An
 
 
 # ---------------------------------------------------------------------------
+# Glovo (McDonald's etc.)
+# ---------------------------------------------------------------------------
+
+GLOVO_PRODUCT_RE = re.compile(
+    r'"description":"(?P<desc>(?:\\.|[^"\\])*)"'
+    r',"externalId":"(?P<ext>[^"]+)"'
+    r',"id":"(?P<id>[^"]+)"'
+    r',"imageId":"[^"]+"'
+    r',"imageUrl":"[^"]+"'
+    r',"name":"(?P<name>[^"]+)"'
+    r',"price":(?P<price>\d+)',
+)
+
+DESC_META_RE = re.compile(
+    r"(?P<weight>\d+(?:[.,]\d+)?\s*(?:г|мл|шт))\s*\|\s*(?P<kcal>\d+)\s*ккал",
+    re.I,
+)
+
+
+def unescape_js_string(value: str) -> str:
+    try:
+        return json.loads(f'"{value}"')
+    except json.JSONDecodeError:
+        return value.replace('\\"', '"').replace("\\n", "\n")
+
+
+def glovo_rsc_text(html: str) -> str:
+    chunks: list[str] = []
+    for payload in re.findall(r'self\.__next_f\.push\(\[1,"((?:\\.|[^"\\])*)"\]\)', html):
+        chunks.append(unescape_js_string(payload))
+    return "\n".join(chunks)
+
+
+def glovo_category(name: str, description: str) -> str:
+    blob = f"{name} {description}".casefold()
+    if "благодійн" in blob:
+        return "Благодійність"
+    if "хеппі" in blob or "іграшка" in blob or blob.startswith("книга"):
+        return "Хеппі Міл"
+    if any(x in blob for x in ("салат",)):
+        return "Салати"
+    if any(x in blob for x in ("рол",)):
+        return "Роли"
+    if any(x in blob for x in ("нагетс", "стріпс", "крильц", "чікен бокс")):
+        return "Курка"
+    if any(x in blob for x in ("фрі", "картопл", "соус", "мед", "вівсян")):
+        return "Картопля, каша та соуси"
+    if any(
+        x in blob
+        for x in (
+            "флурі",
+            "санд",
+            "шейк",
+            "пиріг",
+            "мафін",
+            "круасан",
+            "попс",
+            "морозив",
+            "grimace",
+        )
+    ):
+        return "Десерти"
+    if any(
+        x in blob
+        for x in (
+            "кола",
+            "фанта",
+            "спрайт",
+            "сік",
+            "вода",
+            "mcfizz",
+            "айс ",
+        )
+    ):
+        return "Холодні напої"
+    if any(
+        x in blob
+        for x in ("американо", "лате", "капуч", "мокко", "чай", "флет", "какао", "еспресо")
+    ):
+        return "Кава та чай"
+    return "Бургери"
+
+
+def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
+    response = http.get(url, timeout=TIMEOUT)
+    response.raise_for_status()
+    text = glovo_rsc_text(response.text)
+    if not text:
+        raise ParseError("Сторінка Glovo без каталогу (__next_f)")
+
+    items: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for match in GLOVO_PRODUCT_RE.finditer(text):
+        item_id = match.group("id")
+        if item_id in seen:
+            continue
+        seen.add(item_id)
+        name = html_text(match.group("name"))
+        description = html_text(unescape_js_string(match.group("desc")))
+        if "благодійн" in name.casefold() or "благодійн" in description.casefold():
+            continue
+        category = glovo_category(name, description)
+        weight = None
+        kcal = None
+        meta = DESC_META_RE.search(description)
+        if meta:
+            weight = re.sub(r"\s+", "", meta.group("weight"))
+            kcal = int(meta.group("kcal"))
+            description = DESC_META_RE.sub("", description).strip(" .")
+        items.append(
+            {
+                "id": item_id,
+                "section": category,
+                "category": category,
+                "name": name,
+                "description": description,
+                "price": money_uah(match.group("price"), kopecks=False),
+                "weight": weight,
+                "available": True,
+                "allergens": [],
+                "tags": [],
+                "kcal": kcal,
+                "options": [],
+            }
+        )
+    if not items:
+        raise ParseError("У Glovo не знайдено позицій меню")
+
+    parsed = urlparse(url)
+    place_name = "McDonald's"
+    title = re.search(r"<title>([^<]+)</title>", response.text, re.I)
+    if title and "McDonald" in title.group(1):
+        place_name = "McDonald's"
+    city = ""
+    if "vinnyts" in parsed.path.lower() or "-vnt" in parsed.path.lower():
+        city = "Vinnytsia"
+
+    return {
+        "source": "glovo",
+        "url": url,
+        "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "place": {
+            "name": place_name,
+            "type": "fastfood",
+            "address": "Вінниця" if city else "",
+            "city": city,
+            "phone": "",
+            "instagram": "",
+            "currency": "₴",
+        },
+        "hours": [],
+        "items": items,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Markdown
 # ---------------------------------------------------------------------------
 
@@ -509,6 +665,8 @@ def detect_and_parse(http: requests.Session, url: str, lang: str) -> dict[str, A
         "expz.menu" in url or "shaketopay.com.ua" in url
     ):
         return parse_expirenza(http, url, lang)
+    if "glovoapp.com" in urlparse(url).netloc.lower():
+        return parse_glovo(http, url)
 
     response = http.get(url, timeout=TIMEOUT)
     response.raise_for_status()
@@ -518,14 +676,14 @@ def detect_and_parse(http: requests.Session, url: str, lang: str) -> dict[str, A
     if expirenza_restaurant_id(url):
         return parse_expirenza(http, url, lang)
     raise ParseError(
-        "Не впізнано джерело. Підтримуються ChoiceQR (miro.vn.ua, *.choiceqr.com) "
-        "та Expirenza (expz.menu)."
+        "Не впізнано джерело. Підтримуються ChoiceQR, Expirenza (expz.menu) "
+        "та Glovo (glovoapp.com)."
     )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Парсить меню ChoiceQR або Expirenza у data/<name>.json та .md"
+        description="Парсить меню ChoiceQR, Expirenza або Glovo у data/<name>.json та .md"
     )
     parser.add_argument("url", help="URL цифрового меню")
     parser.add_argument("-n", "--name", required=True, help="ім'я файлів у data/, напр. miro")
