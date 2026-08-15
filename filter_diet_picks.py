@@ -771,27 +771,20 @@ def main() -> None:
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    all_out = {
-        "diet_id": diet["id"],
-        "diet_name": diet["name"],
-        "source_profile": "data/diet.json",
-        "mode": diet.get("mode", "healthy_baseline"),
-        "note": (
-            "Ширший відбір: середземноморська база + просто корисна їжа в закладах "
-            "(супи, гриль, прості суші, курка, яйця). Не медична рекомендація. "
-            "caution = норм, але не ідеал (соус, жирніше м’ясо, круасан тощо)."
-        ),
-        "places": {},
-    }
+    # Drop stale machine dumps from older runs
+    for stale in OUT_DIR.glob("*.json"):
+        stale.unlink()
 
     readme = [
         "# Що брати (корисна база)\n\n",
         f"Профіль: `{diet['id']}` — {diet['name']}.\n\n",
         "Режим ширший: не лише ідеальні боули, а **будь-яка нормальна їжа** без фритюру/солодкого/алко.\n\n",
-        "У кожному закладі: **їсти** / **з обережністю** / **пити** / **краще не брати**.\n\n",
+        "У кожному закладі: **їсти** / **з обережністю** / **пити** (+ короткі приклади чого уникати).\n\n",
         "> Не медична рекомендація. Голодний > ідеальний. При СПК — бульйон, рис, яйце.\n",
         "\nПерегенерація: `python3 filter_diet_picks.py`\n",
     ]
+
+    summaries: dict[str, dict] = {}
 
     for slug, rel in PLACES.items():
         path = ROOT / rel
@@ -808,8 +801,7 @@ def main() -> None:
                 "name": it.get("name"),
                 "price": it.get("price"),
                 "category": it.get("category") or it.get("section"),
-                "description": (it.get("description") or "")[:240] or None,
-                "weight": it.get("weight"),
+                "description": (it.get("description") or "")[:200] or None,
             }
             entry = {k: v for k, v in entry.items() if v not in (None, "", [])}
             buckets[label].append(entry)
@@ -818,17 +810,8 @@ def main() -> None:
             buckets[k] = dedupe(buckets[k])
             buckets[k].sort(key=lambda e: e["name"].lower())
 
-        place_out = {
-            "place": pname,
-            "address": addr,
-            "source": rel,
-            "counts": {k: len(v) for k, v in buckets.items()},
-            **buckets,
-        }
-        all_out["places"][slug] = place_out
-        (OUT_DIR / f"{slug}.json").write_text(
-            json.dumps(place_out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-        )
+        counts = {k: len(v) for k, v in buckets.items()}
+        summaries[slug] = {"place": pname, "counts": counts}
 
         lines = [f"# {pname} — корисна база\n", f"Джерело: `{rel}`\n"]
         if addr:
@@ -837,31 +820,35 @@ def main() -> None:
             ("Їсти", "eat"),
             ("З обережністю", "caution"),
             ("Пити", "drink"),
-            ("Краще не брати", "avoid"),
         ]:
             lines.append(f"\n## {title}\n")
             items = buckets[key]
             if not items:
                 lines.append("_немає явних збігів_\n")
                 continue
-            limit = 120 if key != "avoid" else 50
-            for e in items[:limit]:
+            for e in items:
                 cat = f" _{e['category']}_" if e.get("category") else ""
                 lines.append(f"- **{e['name']}**{fmt_price(e.get('price'))}{cat}")
-                if e.get("description") and key != "avoid":
-                    lines.append(f"  - {e['description'][:160]}")
-            if len(items) > limit:
-                lines.append(f"\n_…ще {len(items) - limit} у `{slug}.json`_\n")
+                if e.get("description"):
+                    lines.append(f"  - {e['description'][:140]}")
+
+        # Keep avoid short — full menus already list everything
+        lines.append(f"\n## Краще не брати\n")
+        lines.append(f"_усього відсіяно: {counts['avoid']}_\n")
+        for e in buckets["avoid"][:12]:
+            lines.append(f"- {e['name']}")
+        if counts["avoid"] > 12:
+            lines.append(f"- …і ще {counts['avoid'] - 12}")
+
         (OUT_DIR / f"{slug}.md").write_text("\n".join(lines) + "\n", encoding="utf-8")
 
         readme.append(f"\n## {pname}\n")
         if addr:
             readme.append(f"{addr}\n\n")
-        readme.append(f"- [`{slug}.md`]({slug}.md) / [`{slug}.json`]({slug}.json)\n")
-        c = place_out["counts"]
+        readme.append(f"- [`{slug}.md`]({slug}.md)\n")
         readme.append(
-            f"- їсти: **{c['eat']}**, обережно: **{c['caution']}**, "
-            f"пити: **{c['drink']}**, уникати: **{c['avoid']}**\n"
+            f"- їсти: **{counts['eat']}**, обережно: **{counts['caution']}**, "
+            f"пити: **{counts['drink']}**, уникати: **{counts['avoid']}**\n"
         )
         if buckets["eat"]:
             readme.append("- топ їсти: " + ", ".join(e["name"] for e in buckets["eat"][:10]) + "\n")
@@ -872,22 +859,15 @@ def main() -> None:
         if buckets["drink"]:
             readme.append("- пити: " + ", ".join(e["name"] for e in buckets["drink"][:6]) + "\n")
 
-    (OUT_DIR / "all.json").write_text(
-        json.dumps(all_out, ensure_ascii=False, indent=2) + "\n", encoding="utf-8"
-    )
     (OUT_DIR / "README.md").write_text("".join(readme), encoding="utf-8")
 
     print(f"Wrote {OUT_DIR}")
-    for slug, p in all_out["places"].items():
+    for slug, p in summaries.items():
         c = p["counts"]
         print(
             f"  {slug}: eat={c['eat']} caution={c['caution']} "
             f"drink={c['drink']} avoid={c['avoid']}"
         )
-        print("    EAT:", [e["name"] for e in p["eat"][:10]])
-        if p["caution"]:
-            print("    CAUTION:", [e["name"] for e in p["caution"][:8]])
-        print("    DRINK:", [e["name"] for e in p["drink"][:6]])
 
 
 if __name__ == "__main__":
