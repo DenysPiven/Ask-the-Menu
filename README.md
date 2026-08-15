@@ -23,6 +23,7 @@
 - `data/mcdonalds.json` / `data/mcdonalds.md` — McDonald's, Вінниця (Glovo)
 - `data/woods.json` / `data/woods.md` — Woods, Вінниця, Політехнічна 10а
 - `data/lvivcroissants.json` / `data/lvivcroissants.md` — Lviv Croissants, Вінниця (Glovo)
+- `data/diet.json` / `data/diet.md` — персональна середземноморська дієта (адаптована під діагнози)
 
 ## Встановлення
 
