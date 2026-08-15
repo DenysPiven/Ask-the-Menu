@@ -1,0 +1,530 @@
+{
+  "place": "Woods",
+  "address": "вул. Політехнічна 10а, м. Вінниця",
+  "source": "data/woods.json",
+  "counts": {
+    "eat": 2,
+    "caution": 2,
+    "drink": 2,
+    "avoid": 76
+  },
+  "eat": [
+    {
+      "name": "Креветки по-тайськи",
+      "price": 310.0,
+      "category": "Гарячі страви",
+      "description": "Креветки тигрові, цибуля, перець болгарський, соус",
+      "weight": "250g"
+    },
+    {
+      "name": "Салат з авокадо та креветками",
+      "price": 280.0,
+      "category": "Салати",
+      "description": "Листя салату, креветки тигрові, авокадо, томати черрі, перець болгарський, соус медово-гірчичний",
+      "weight": "250g"
+    }
+  ],
+  "caution": [
+    {
+      "name": "Асорті брускети 4шт",
+      "price": 340.0,
+      "category": "Закуски",
+      "description": "* Брускети з крем-сиром, лососем та свіжим огірком — хрусткий багет із ніжним крем-сиром, слабосоленим лососем та свіжим огірком. * Брускети з хамоном та гуакамоле — хрусткі брускети з ніжним гуакамоле та ароматним хамоном.",
+      "weight": "380g"
+    },
+    {
+      "name": "Боул",
+      "price": 320.0,
+      "category": "Салати",
+      "description": "Боул з вугрем/лососем/креветкою/ на вибір.",
+      "weight": "500g"
+    }
+  ],
+  "drink": [
+    {
+      "name": "Кава (в асортименті)",
+      "price": 65.0,
+      "category": "Б/А Напої",
+      "description": "Еспресо 50₴ Допіо 65₴ Американо 50₴ Капучино 80₴ Латте 80₴"
+    },
+    {
+      "name": "Чай (в асортименті)",
+      "price": 120.0,
+      "category": "Б/А Напої",
+      "weight": "600ml"
+    }
+  ],
+  "avoid": [
+    {
+      "name": "Amaretto sour",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "220ml"
+    },
+    {
+      "name": "Aperol Spritz",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Aperol, біле сухе вино, Schweppes Bitter Lemon",
+      "weight": "340ml"
+    },
+    {
+      "name": "B-52",
+      "price": 140.0,
+      "category": "Шоти",
+      "description": "Kahlua, Baileys, тріпл сек"
+    },
+    {
+      "name": "BBQ",
+      "price": 320.0,
+      "category": "Бургери",
+      "description": "Томати, огірок маринований, смажене яйце, бекон, котлета з телятини або курки, сир чедер, цибуля маринована, листя салату, соус BBQ, подається з картоплею фрі",
+      "weight": "420g"
+    },
+    {
+      "name": "Blueberry Yogurt",
+      "price": 280.0,
+      "category": "Авторські коктейлі",
+      "description": "Blueberry Yogurt — ніжний вершково-ягідний коктейль із насиченим смаком чорниці та легкою лимонною свіжістю.",
+      "weight": "220ml"
+    },
+    {
+      "name": "BMW",
+      "price": 140.0,
+      "category": "Шоти",
+      "description": "Baileys, Malibu, віскі"
+    },
+    {
+      "name": "Brain Tumor",
+      "price": 140.0,
+      "category": "Шоти",
+      "description": "Самбука, вермут Bianco, Baileys, гренадін"
+    },
+    {
+      "name": "Capitan Morgan gold 50ml",
+      "price": 120.0,
+      "category": "Розливний алкоголь",
+      "description": "Captain Morgan White 100₴ Captain Morgan Spiced Black 100₴ Captain Morgan Spiced Gold 100₴ Captain Morgan Sliced Apple 100₴",
+      "weight": "50ml"
+    },
+    {
+      "name": "Clover Club",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Джин, малиновий сироп, фреш лимона, замінник білка",
+      "weight": "220ml"
+    },
+    {
+      "name": "Coca Cola coffee+caramel 0.33",
+      "price": 85.0,
+      "category": "Б/А Напої"
+    },
+    {
+      "name": "Cola",
+      "price": 70.0,
+      "category": "Б/А Напої"
+    },
+    {
+      "name": "CORONA EXTRA пляшкове",
+      "price": 125.0,
+      "category": "Пиво"
+    },
+    {
+      "name": "Cosmopolitan",
+      "price": 280.0,
+      "category": "Авторські коктейлі",
+      "description": "Освіжаючий кислий коктейль з журавлини",
+      "weight": "220ml"
+    },
+    {
+      "name": "Filandia 50ml",
+      "price": 80.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Fried set",
+      "price": 480.0,
+      "category": "Сети",
+      "description": "Цибулеві кільця Нагести Картопля фрі Сирні кульки",
+      "weight": "580g"
+    },
+    {
+      "name": "Gin 50ml",
+      "price": 120.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Gin sour",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "270ml"
+    },
+    {
+      "name": "Gin tonic",
+      "price": 180.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "220ml"
+    },
+    {
+      "name": "Green Mexican",
+      "price": 140.0,
+      "category": "Шоти",
+      "description": "Лікер Pisang, текіла, фреш лимона, лайм"
+    },
+    {
+      "name": "Hiroshima",
+      "price": 140.0,
+      "category": "Шоти",
+      "description": "Самбука, Baileys, абсент, гренадін"
+    },
+    {
+      "name": "Jack Daniel’s 50ml",
+      "price": 160.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Jameson 50ml",
+      "price": 160.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Jellyfish",
+      "price": 140.0,
+      "category": "Шоти",
+      "description": "Malibu, Blue curasao, Baileys"
+    },
+    {
+      "name": "Jim Beam 50ml",
+      "price": 140.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Jägermeister",
+      "price": 130.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Long beach Ice tea",
+      "price": 280.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Горілка, білий ром, текіла, джин, тріпл сек, фреш лимону, сік ананасовий, сік гранатовий"
+    },
+    {
+      "name": "Long iceland Ice tea",
+      "price": 280.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Горілка, білий ром, текіла, джин, тріпл сек, кола, фреш лимону, лимон"
+    },
+    {
+      "name": "Mai Thai",
+      "price": 280.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "340ml"
+    },
+    {
+      "name": "Mojito",
+      "price": 220.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "330ml"
+    },
+    {
+      "name": "Mojito N/A",
+      "price": 180.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "330ml"
+    },
+    {
+      "name": "Monster energy zero 0.5",
+      "price": 125.0,
+      "category": "Б/А Напої",
+      "weight": "500ml"
+    },
+    {
+      "name": "Negroni",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Джин, червоний вермут, кампарі, цедра апельсина",
+      "weight": "220ml"
+    },
+    {
+      "name": "Old Fashioned",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Віскі, Angostura, цукор, цедра апельсину"
+    },
+    {
+      "name": "Popcorn Sour",
+      "price": 280.0,
+      "category": "Авторські коктейлі",
+      "description": "Попкорн Сауер — гармонійне поєднання бурбона, попкорнового сиропу та лимонної свіжості.",
+      "weight": "220ml"
+    },
+    {
+      "name": "RedBull",
+      "price": 110.0,
+      "category": "Б/А Напої"
+    },
+    {
+      "name": "Rum cola",
+      "price": 180.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "220ml"
+    },
+    {
+      "name": "Schweppes 0,25",
+      "price": 70.0,
+      "category": "Б/А Напої"
+    },
+    {
+      "name": "Sex on The Beach",
+      "price": 280.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Горілка, Peachtree, апельсин, сік ананас/журавлина/гранат"
+    },
+    {
+      "name": "Space Tea",
+      "price": 450.0,
+      "category": "Кальяни"
+    },
+    {
+      "name": "Sprite",
+      "price": 70.0,
+      "category": "Б/А Напої"
+    },
+    {
+      "name": "Strawberry Kiss",
+      "price": 280.0,
+      "category": "Авторські коктейлі",
+      "description": "Strawberry Kiss — освіжаючий кисло-солодкий коктейль із соковитою полуницею та легкою цитрусовою свіжістю.",
+      "weight": "220ml"
+    },
+    {
+      "name": "Tequila Jarana 50ml",
+      "price": 120.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Whisker Sour",
+      "price": 260.0,
+      "category": "Алкогольні коктейлі",
+      "description": "Віскі, фреш лимона, цукровий сироп, замінник білка, цедра апельсина"
+    },
+    {
+      "name": "Whiskey cola",
+      "price": 180.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "220ml"
+    },
+    {
+      "name": "Zombie",
+      "price": 280.0,
+      "category": "Алкогольні коктейлі",
+      "weight": "330ml"
+    },
+    {
+      "name": "Американська класика",
+      "price": 270.0,
+      "category": "Бургери",
+      "description": "Томати, огірок маринований, котлета з телятини або курки, сир чедер, цибуля маринована, листя салату, соус класичний, подається з картоплею фрі",
+      "weight": "370g"
+    },
+    {
+      "name": "Горілка Nikita 50ml",
+      "price": 60.0,
+      "category": "Розливний алкоголь",
+      "weight": "50g"
+    },
+    {
+      "name": "Дошка компанійська",
+      "price": 530.0,
+      "category": "Сети",
+      "description": "Сирні кульки, картопля фрі, нагетси курячі, курячі крильця, соус",
+      "weight": "750g"
+    },
+    {
+      "name": "Дошка м'ясна",
+      "price": 400.0,
+      "category": "Сети",
+      "description": "Нагетси курячі, кабаноси, бастурма, хамон/прошутто, соус",
+      "weight": "320g"
+    },
+    {
+      "name": "Дошка пивна",
+      "price": 400.0,
+      "category": "Сети",
+      "description": "Грінки часникові, начос, кабаноси, бастурма, арахіс солений, соус",
+      "weight": "350g"
+    },
+    {
+      "name": "Карбонара",
+      "price": 230.0,
+      "category": "Гарячі страви",
+      "description": "Паста, пармезан, яйце перепелине, бекон копчений, вершки",
+      "weight": "260g"
+    },
+    {
+      "name": "Картопля фрі",
+      "price": 95.0,
+      "category": "Закуски",
+      "weight": "150g"
+    },
+    {
+      "name": "Крильця в медовому соусі",
+      "price": 160.0,
+      "category": "Закуски",
+      "weight": "300g"
+    },
+    {
+      "name": "Лимонад (в асортименті)",
+      "price": 110.0,
+      "category": "Б/А Напої",
+      "description": "Диня-розмарин \\ Яблуко-бузина \\ Rock&roll \\ Ягідний \\ Цитрусовий мікс \\ Баунті",
+      "weight": "210ml"
+    },
+    {
+      "name": "Лимонад 1л",
+      "price": 220.0,
+      "category": "Б/А Напої",
+      "weight": "1000ml"
+    },
+    {
+      "name": "Морозиво",
+      "price": 160.0,
+      "category": "Десерти",
+      "weight": "150g"
+    },
+    {
+      "name": "Нагетси курячі",
+      "price": 165.0,
+      "category": "Закуски",
+      "weight": "150g"
+    },
+    {
+      "name": "Наливка",
+      "price": 60.0,
+      "category": "Розливний алкоголь",
+      "weight": "50ml"
+    },
+    {
+      "name": "Начос",
+      "price": 75.0,
+      "category": "Закуски",
+      "weight": "50g"
+    },
+    {
+      "name": "Ньокі з морепродуктами",
+      "price": 320.0,
+      "category": "Гарячі страви",
+      "description": "Картопляні ньокі з креветками та мідіями у вершковому соусі",
+      "weight": "300g"
+    },
+    {
+      "name": "Паста по Азійськи з куркою",
+      "price": 240.0,
+      "category": "Гарячі страви",
+      "description": "Паста, куряче філе, цибуля, фасоль, перець болгарський, соус бальзамічний, кисло-солодкий соус, соус соєвий, кунжут",
+      "weight": "420g"
+    },
+    {
+      "name": "Пиво розливне",
+      "price": 80.0,
+      "category": "Пиво"
+    },
+    {
+      "name": "Сherry bomber",
+      "price": 270.0,
+      "category": "Бургери",
+      "description": "Томати, котлета з телятини або курки, сир чедер, листя салату, соус сирно-вишневий, подається з картоплею фрі",
+      "weight": "370g"
+    },
+    {
+      "name": "Світлий ель 0,33",
+      "price": 60.0,
+      "category": "Пиво",
+      "weight": "330ml"
+    },
+    {
+      "name": "Сет лонгів",
+      "price": 850.0,
+      "category": "Сети напоїв",
+      "description": "Long island ice tea, Tokio ice tea, Long beach ice tea, AMF"
+    },
+    {
+      "name": "Сет шотів",
+      "price": 800.0,
+      "category": "Сети напоїв",
+      "description": "Green mexican, B-52, Brain tumor, Jellyfish, Hiroshima, BMW"
+    },
+    {
+      "name": "Сидр (в асортименті)",
+      "price": 80.0,
+      "category": "Пиво"
+    },
+    {
+      "name": "Сирний",
+      "price": 340.0,
+      "category": "Бургери",
+      "description": "Котлета з телятини або курки, котлета з моцарелли, сир чеддер, томати, листя салату, соус смородиновий, подається з картоплею фрі",
+      "weight": "480g"
+    },
+    {
+      "name": "Смакова колба",
+      "price": 150.0,
+      "category": "Кальяни",
+      "weight": "1шт"
+    },
+    {
+      "name": "Сік 1л",
+      "price": 220.0,
+      "category": "Б/А Напої",
+      "weight": "1000ml"
+    },
+    {
+      "name": "Сік в асортименті 0.25",
+      "price": 65.0,
+      "category": "Б/А Напої",
+      "weight": "250ml"
+    },
+    {
+      "name": "Фірмовий «Woods»",
+      "price": 310.0,
+      "category": "Бургери",
+      "description": "Томати, фірмова куряча котлета з вершковим маслом та зеленню, сир чеддер, листя салату, соус фірмовий, подається з картоплею фрі",
+      "weight": "420g"
+    },
+    {
+      "name": "Цезар з куркою",
+      "price": 260.0,
+      "category": "Салати",
+      "description": "Листя салату, бекон копчений, грінки, пармезан, курка, яйця перепелині, соус Тонато",
+      "weight": "250g"
+    },
+    {
+      "name": "Цезар з лососем",
+      "price": 280.0,
+      "category": "Салати",
+      "description": "Листя салату, бекон копчений, грінки, пармезан, лосось, яйця перепелині, соус Тонато",
+      "weight": "250g"
+    },
+    {
+      "name": "Чай крафтовий",
+      "price": 140.0,
+      "category": "Б/А Напої",
+      "weight": "500ml"
+    },
+    {
+      "name": "Чилі Конкарне",
+      "price": 200.0,
+      "category": "Гарячі страви",
+      "description": "Чілі кон карне — соковита свинина в пікантному томатному соусі з кукурудзою та зеленим горошком. Насичена, ароматна страва з легкою гостринкою та яскравим мексиканським характером.",
+      "weight": "290g"
+    }
+  ]
+}
