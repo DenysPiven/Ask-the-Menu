@@ -24,6 +24,13 @@
 - `data/woods.json` / `data/woods.md` — Woods, Вінниця, Політехнічна 10а
 - `data/lvivcroissants.json` / `data/lvivcroissants.md` — Lviv Croissants, Вінниця (Glovo)
 - `data/diet.json` / `data/diet.md` — персональна середземноморська дієта (адаптована під діагнози)
+- `data/diet_picks/` — ті самі заклади, відфільтровані під дієту (**їсти** / **з обережністю** / **пити** / **уникати**); старт з [`data/diet_picks/README.md`](data/diet_picks/README.md)
+
+Перегенерація відбору:
+
+```bash
+python3 filter_diet_picks.py
+```
 
 ## Встановлення
 
