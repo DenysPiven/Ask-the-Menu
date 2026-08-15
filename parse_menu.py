@@ -484,8 +484,39 @@ def glovo_category(name: str, description: str) -> str:
         return "Благодійність"
     if "хеппі" in n or "іграшка" in n or n.startswith("книга"):
         return "Хеппі Міл"
-    if "салат" in n:
+    if "салат" in n and "круасан" not in n:
         return "Салати"
+    if "суп" in n or "бульйон" in n:
+        return "Супи"
+    if "круасан" in n and any(
+        x in n
+        for x in (
+            "шоколад",
+            "фісташ",
+            "вишн",
+            "полуниц",
+            "малин",
+            "персик",
+            "лохи",
+            "карамел",
+            "нутел",
+            "дубай",
+            "банан",
+            "ягід",
+            "маскарпон",
+            "п'ян",
+            "пян",
+            "marshmallow",
+            "рафаел",
+            "спред",
+            "згущ",
+            "солодк",
+            "насолод",
+        )
+    ):
+        return "Солодкі круасани"
+    if "круасан" in n:
+        return "Сендвіч-круасани"
     if "рол" in n:
         return "Роли"
     if any(x in n for x in ("нагетс", "стріпс", "крильц", "чікен бокс")):
@@ -503,20 +534,43 @@ def glovo_category(name: str, description: str) -> str:
             "круасан",
             "попс",
             "grimace",
+            "тірам",
+            "чизкейк",
+            "десерт",
         )
-    ):
+    ) and "сендвіч" not in n and "круасан" not in n:
         return "Десерти"
     if any(
         x in n
-        for x in ("кола", "фанта", "спрайт", "сік", "вода", "mcfizz", "айс")
+        for x in ("кола", "фанта", "спрайт", "сік", "вода", "mcfizz", "айс", "лимонад", "смузі", "smoothie")
     ):
         return "Холодні напої"
     if any(
         x in n
-        for x in ("американо", "лате", "капуч", "мокко", "чай", "флет", "какао", "еспресо")
+        for x in ("американо", "лате", "капуч", "мокко", "чай", "флет", "какао", "еспресо", "раф", "матча")
     ):
         return "Кава та чай"
-    return "Бургери"
+    return "Меню"
+
+
+NAME_WEIGHT_RE = re.compile(r"\((?P<weight>\d+(?:[.,]\d+)?\s*(?:г|мл|шт))\)\s*$", re.I)
+
+
+def glovo_place_name(html: str, url: str) -> str:
+    title = re.search(r"<title>([^<]+)</title>", html, re.I)
+    if title:
+        raw = html_text(title.group(1))
+        for prefix in ("Доставка з ", "Доставка из ", "Delivery from "):
+            if raw.startswith(prefix):
+                raw = raw[len(prefix) :]
+        for sep in (" у м.", " в г.", " in ", " | "):
+            if sep in raw:
+                raw = raw.split(sep, 1)[0]
+        if raw and raw.casefold() not in {"glovo"}:
+            return raw.strip()
+    slug = urlparse(url).path.rstrip("/").split("/")[-1]
+    slug = re.sub(r"-(vnt|kyi|kyiv|lviv)$", "", slug, flags=re.I)
+    return slug.replace("-", " ").title() or "Glovo"
 
 
 def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
@@ -528,8 +582,9 @@ def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
 
     items: list[dict[str, Any]] = []
     seen: set[str] = set()
+    seen_name_price: set[tuple[str, float | None]] = set()
     for match in GLOVO_PRODUCT_RE.finditer(text):
-        item_id = match.group("id")
+        item_id = str(match.group("id"))
         if item_id in seen:
             continue
         seen.add(item_id)
@@ -545,6 +600,15 @@ def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
             weight = re.sub(r"\s+", "", meta.group("weight"))
             kcal = int(meta.group("kcal"))
             description = DESC_META_RE.sub("", description).strip(" .")
+        named = NAME_WEIGHT_RE.search(name)
+        if named and not weight:
+            weight = re.sub(r"\s+", "", named.group("weight"))
+            name = NAME_WEIGHT_RE.sub("", name).strip()
+        price = money_uah(match.group("price"), kopecks=False)
+        key = (name.casefold(), price)
+        if key in seen_name_price:
+            continue
+        seen_name_price.add(key)
         items.append(
             {
                 "id": item_id,
@@ -552,7 +616,7 @@ def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
                 "category": category,
                 "name": name,
                 "description": description,
-                "price": money_uah(match.group("price"), kopecks=False),
+                "price": price,
                 "weight": weight,
                 "available": True,
                 "allergens": [],
@@ -565,21 +629,20 @@ def parse_glovo(http: requests.Session, url: str) -> dict[str, Any]:
         raise ParseError("У Glovo не знайдено позицій меню")
 
     parsed = urlparse(url)
-    place_name = "McDonald's"
-    title = re.search(r"<title>([^<]+)</title>", response.text, re.I)
-    if title and "McDonald" in title.group(1):
-        place_name = "McDonald's"
+    place_name = glovo_place_name(response.text, url)
     city = ""
-    if "vinnyts" in parsed.path.lower() or "-vnt" in parsed.path.lower():
+    path = parsed.path.lower()
+    if "vinnyts" in path or path.endswith("-vnt") or "/vnt" in path or path.endswith("vnt"):
         city = "Vinnytsia"
+    place_type = "bakery" if "croissant" in place_name.casefold() or "круасан" in place_name.casefold() else "restaurant"
 
     return {
         "source": "glovo",
-        "url": url,
+        "url": url.split("?")[0],
         "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
         "place": {
             "name": place_name,
-            "type": "fastfood",
+            "type": place_type,
             "address": "Вінниця" if city else "",
             "city": city,
             "phone": "",
