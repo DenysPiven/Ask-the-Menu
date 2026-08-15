@@ -22,6 +22,7 @@
 - `data/longshot.json` / `data/longshot.md` — LongShot, Вінниця, Юності 18
 - `data/mcdonalds.json` / `data/mcdonalds.md` — McDonald's, Вінниця (Glovo)
 - `data/woods.json` / `data/woods.md` — Woods, Вінниця, Політехнічна 10а
+- `data/lvivcroissants.json` / `data/lvivcroissants.md` — Lviv Croissants, Вінниця (Glovo)
 
 ## Встановлення
 
@@ -45,6 +46,10 @@ python parse_menu.py \
   -n mcdonalds
 
 python parse_menu.py https://woods.duck-hub.com/menu -n woods
+
+python parse_menu.py \
+  "https://glovoapp.com/uk/ua/vinnytsia/stores/lvivcroissants-vnt" \
+  -n lvivcroissants
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
