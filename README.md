@@ -18,20 +18,13 @@
 
 У репозиторії вже є зліпки:
 
-- `data/miro.json` / `data/miro.md` — MIRO CAFE, Вінниця, Келецька 57
-- `data/longshot.json` / `data/longshot.md` — LongShot, Вінниця, Юності 18
-- `data/mcdonalds.json` / `data/mcdonalds.md` — McDonald's, Вінниця (Glovo)
-- `data/woods.json` / `data/woods.md` — Woods, Вінниця, Політехнічна 10а
-- `data/lvivcroissants.json` / `data/lvivcroissants.md` — Lviv Croissants, Вінниця (Glovo)
-- `data/diet.json` / `data/diet.md` — персональна середземноморська дієта (адаптована під діагнози)
-- `data/diet_picks/` — ті самі заклади, відфільтровані під дієту (**їсти** / **з обережністю** / **пити** / **уникати**); старт з [`data/diet_picks/README.md`](data/diet_picks/README.md)
+| Файл | Що це |
+|---|---|
+| `data/<place>.json` + `.md` | повне меню закладу |
+| `data/diet.json` + `.md` | профіль дієти |
+| [`data/diet_picks/`](data/diet_picks/README.md) | що брати в кожному закладі |
 
-Перегенерація відбору:
-
-```bash
-python3 filter_diet_picks.py
-```
-
+Перегенерація відбору: `python3 filter_diet_picks.py`
 ## Встановлення
 
 ```bash
