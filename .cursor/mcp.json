@@ -1,6 +1,7 @@
 {
   "mcpServers": {
     "silpo": {
+      "type": "http",
       "url": "https://mcp.silpo.ua/mcp"
     }
   }
