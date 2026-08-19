@@ -16,6 +16,7 @@ PLACES = {
     "mcdonalds": "data/mcdonalds.json",
     "woods": "data/woods.json",
     "lvivcroissants": "data/lvivcroissants.json",
+    "ostriv": "data/ostriv.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
