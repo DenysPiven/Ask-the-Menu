@@ -1,0 +1,13 @@
+---
+description: Git workflow — push directly to master, no pull requests
+alwaysApply: true
+---
+
+# Git Workflow
+
+This is a personal pet project. No pull requests, no feature branches.
+
+- Commit and push changes directly to `master`
+- Never create a pull request
+- Never create a feature branch unless explicitly asked
+- After committing: `git push origin master`
