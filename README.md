@@ -21,8 +21,11 @@
 | Файл | Що це |
 |---|---|
 | `data/<place>.json` + `.md` | повне меню закладу |
+| `data/silpo.json` + `.md` | продуктова база Сільпо (grocery, ready-to-eat) |
 | `data/diet.json` + `.md` | профіль дієти |
-| [`data/diet_picks/`](data/diet_picks/README.md) | що брати в кожному закладі |
+| [`data/diet_picks/`](data/diet_picks/README.md) | що брати — заклади + магазин |
+
+> **Сільпо** — окремий формат: `source: "silpo-mcp"`, `type: "grocery"`, поля `category/subcategory` замість `section/category`, `ready_to_eat: true` і `context.situation`. Дані отримано через [Silpo MCP](https://mcp.silpo.ua/mcp).
 
 Перегенерація відбору: `python3 filter_diet_picks.py`
 ## Встановлення
