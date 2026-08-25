@@ -1,6 +1,6 @@
 # Ask the Menu
 
-Парсер цифрових меню і підказка «що поїсти». Без API-ключів: дані з публічних сторінок ChoiceQR, Expirenza, Glovo і Duck Hub.
+Парсер цифрових меню і підказка «що поїсти». Меню закладів — з публічних сторінок ChoiceQR, Expirenza, Glovo і Duck Hub. Сільпо — окремо, через офіційний MCP (магазин, не заклад).
 
 ## Що вміє
 
@@ -22,12 +22,30 @@
 |---|---|
 | `data/<place>.json` + `.md` | повне меню закладу |
 | `data/silpo.json` + `.md` | продуктова база Сільпо (grocery, ready-to-eat) |
-| `data/diet.json` + `.md` | профіль дієти |
+| `data/diet.json` + `.md` | профіль дієти (дім / заклади / заборони) |
 | [`data/diet_picks/`](data/diet_picks/README.md) | що брати — заклади + магазин |
+| `.cursor/mcp.json` | MCP **Сільпо** (`https://mcp.silpo.ua/mcp`) |
 
 > **Сільпо** — окремий формат: `source: "silpo-mcp"`, `type: "grocery"`, поля `category/subcategory` замість `section/category`, `ready_to_eat: true` і `context.situation`. Дані отримано через [Silpo MCP](https://mcp.silpo.ua/mcp).
 
 Перегенерація відбору: `python3 filter_diet_picks.py`
+
+## Сільпо (MCP)
+
+Це продуктові, не цифрове меню кафе. У Cursor (десктоп) сервер уже прописаний у `.cursor/mcp.json`. Після OAuth на `auth.silpo.ua` агент бачить tools на кшталт `silpo_find_products_batch` і `silpo_add_or_update_cart_products`.
+
+**Cloud Agent** цей файл не підхоплює. Додай той самий URL у [cursor.com/agents](https://cursor.com/agents) → MCP:
+
+```json
+{
+  "name": "silpo",
+  "type": "http",
+  "url": "https://mcp.silpo.ua/mcp"
+}
+```
+
+Документація: [ai-factory.silpo.ua/docs/mcp](https://ai-factory.silpo.ua/docs/mcp).
+
 ## Встановлення
 
 ```bash
@@ -58,6 +76,8 @@ python parse_menu.py \
 python parse_menu.py \
   "https://cherrylakevn.choiceqr.com/section:menyu" \
   -n cherrylake
+
+python parse_menu.py https://tiflis374.choiceqr.com/online-menu -n tiflis
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
