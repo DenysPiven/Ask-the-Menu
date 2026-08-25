@@ -16,6 +16,7 @@ PLACES = {
     "mcdonalds": "data/mcdonalds.json",
     "woods": "data/woods.json",
     "lvivcroissants": "data/lvivcroissants.json",
+    "tiflis": "data/tiflis.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
@@ -267,6 +268,14 @@ DRINK_DROP = [
     "коктейл",
     "пив",
     "вино",
+    "вина",
+    "винн",
+    "ігрист",
+    "шампан",
+    "просекко",
+    "prosecco",
+    "cava",
+    "коравн",
     "wine",
     "beer",
     "віскі",
@@ -457,6 +466,13 @@ def is_drink(item: dict) -> bool:
             "коктейл",
             "пиво",
             "вино",
+            "вина",
+            "винн",
+            "ігрист",
+            "шампан",
+            "коравн",
+            "просекко",
+            "prosecco",
             "hand brew",
             "холодні напої",
             "безалкогольн",
@@ -484,13 +500,20 @@ def is_drink(item: dict) -> bool:
             "гарячі",
             "закуск",
             "рол",
-            "меню",
             "breakfast",
             "baked",
             "перші",
+            "хінкал",
+            "мангал",
+            "гарнір",
         )
     )
+    # "МЕНЮ" / "БАРНЕ МЕНЮ" contain "меню" — don't let that cancel drinks
     if drink_cat and not food_cat:
+        return True
+    if drink_cat and any(
+        x in cat for x in ("бар", "вин", "напої", "напій", "чай", "кава", "coffee", "ігрист", "коравн", "алк")
+    ):
         return True
     return any(
         k in name
@@ -594,6 +617,36 @@ def caution_item(item: dict) -> bool:
 
 def drink_ok(item: dict) -> bool:
     name = norm(item.get("name"))
+    cat = norm(item.get("category")) + " " + norm(item.get("section"))
+    if any(
+        d in name or d in cat
+        for d in (
+            "вино",
+            "вина",
+            "винн",
+            "ігрист",
+            "шампан",
+            "просекко",
+            "prosecco",
+            "cava",
+            "коравн",
+            "пив",
+            "wine",
+            "beer",
+            "віскі",
+            "ром",
+            "джин",
+            "горілк",
+            "коньяк",
+            "лікер",
+            "апероль",
+            "мохіто",
+            "коктейл",
+            "глинт",
+            "кальян",
+        )
+    ):
+        return False
     if any(d in name for d in DRINK_DROP):
         return False
     if any(x in name for x in ("long island", "long iceland", "long beach")):
@@ -630,7 +683,6 @@ def drink_ok(item: dict) -> bool:
     ):
         return True
     # category-only teas named by variety
-    cat = norm(item.get("category"))
     if ("чай" in cat or "tea" in cat) and not any(d in name for d in DRINK_DROP):
         return True
     if "coffee" in cat or cat.strip() == "кава":
