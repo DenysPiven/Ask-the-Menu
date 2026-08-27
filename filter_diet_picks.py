@@ -26,7 +26,6 @@ PLACES = {
 SOFT_PREFER = [
     "салат",
     "salad",
-    "томат",
     "авокадо",
     "лосос",
     "тунец",
@@ -37,40 +36,29 @@ SOFT_PREFER = [
     "скрембл",
     "яйц",
     "тофу",
-    "нут",
-    "фасол",
-    "квасол",
     "зелень",
     "овоч",
     "брокол",
     "шпинат",
     "огірк",
-    "оливк",
     "bowl",
     "боул",
     "поке",
     "poke",
-    "грецьк",
     "hummus",
     "хумус",
-    "табуле",
-    "кіноа",
     "вівсян",
-    "капрезе",
-    "брускет",
-    "гаспачо",
     "куряч",
     "індич",
-    "фітнес",
     "тост",
     "сендвіч",
     "сьомг",
     "кальмар",
-    "гранол",
     "суп",
     "бульйон",
     "борщ",
     "окрошк",
+    "солянка",
     "рис",
     "гречк",
     "стейк",
@@ -78,6 +66,8 @@ SOFT_PREFER = [
     "шашлик",
     "гриль",
     "запечен",
+    "парова",
+    "паров",
     "соте",
     "медальйон",
     "макі",
@@ -86,13 +76,17 @@ SOFT_PREFER = [
     "фунчоз",
     "локшин",
     "каша",
+    "пюре",
     "йогурт",
     "моцарел",
     "рукол",
-    "шпинат",
+    "млин",
+    "налисник",
+    "вареник",
+    "хінкал",
 ]
 
-# Only clear junk / heavy / alcohol — not every imperfect dish
+# Clear junk only — diagnosis cautions live in diet.json["caution"]
 HARD_AVOID = [
     "бургер",
     "burger",
@@ -105,27 +99,9 @@ HARD_AVOID = [
     "біг мак",
     "твістер",
     "макчікен",
-    "філе-о-фіш",
-    "фіш рол",
     "темпур",
     "фритюр",
-    "ковбас",
-    "сосиск",
-    "бекон",
-    "bacon",
-    "сало",
     "хот-дог",
-    "піца",
-    "pizza",
-    "лазанья",
-    "карбонар",
-    "вершковий соус",
-    "на вершках",
-    "вершковому соус",
-    "сирний соус",
-    "майонез",
-    "цезар",
-    "caesar",
     "вафл",
     "панкейк",
     "пончик",
@@ -163,14 +139,6 @@ HARD_AVOID = [
     "long island",
     "long iceland",
     "long beach",
-    "кетчуп",
-    "чілі кон",
-    "chili con",
-    "гноккі",
-    "ньокі",
-    "начос",
-    "хешбраун",
-    "хеш-браун",
     "макфрі",
     "картопля фрі",
     "гамбургер",
@@ -180,45 +148,21 @@ HARD_AVOID = [
     "аффогато",
     "канеле",
     "печиво",
-    "банановий хліб",
-    "крок-месьє",
-    "крок месьє",
     "кацу",
     "стріпс",
     "крильц",
     "паніровк",
     "хрумка ззовні",
-    "жульєн",
-    "bbq",
-    "кебаб",
-    "гірос",
-    "giros",
-    "карамел",
-    "сироп",
-    "шот",
-    "кальян",
-    "англійський сніданок",
-    "чікен бокс",
-    "снек рол",
-    "кремі барбекю",
-    "цибулев",
     "fish-and-chips",
     "fish and chips",
-    "шніцель",
-    "кордон блю",
+    "шот",
+    "кальян",
     "настойк",
     "коньяк",
     "лікер",
     "ром ",
     "вермут",
     "бурбон",
-    "реберц",
-    "кентукі",
-    "такос",
-    "tacos",
-    "сирні кульк",
-    "кабанос",
-    "бастурм",
 ]
 
 DRINK_KEEP = [
@@ -403,6 +347,25 @@ CAUTION_CUES = [
     "карпачо",
     "айдахо",
     "пиріжечк",
+    "солянка",
+    "крабов",
+    "майонез",
+    "цезар",
+    "caesar",
+    "копчен",
+    "бекон",
+    "салямі",
+    "ковбас",
+    "карбонар",
+    "вершков",
+    "bbq",
+    "кебаб",
+    "гірос",
+    "giros",
+    "піца",
+    "pizza",
+    "лазанья",
+    "жульєн",
 ]
 
 
@@ -613,12 +576,15 @@ def soft_prefer(item: dict, prefer_kw: list[str]) -> bool:
     return any(p in b for p in prefer_kw + SOFT_PREFER)
 
 
-def caution_item(item: dict) -> bool:
+def caution_item(item: dict, caution_kw: list[str] | None = None) -> bool:
     b = blob_of(item)
     cat = norm(item.get("category"))
     if any(x in cat for x in ("роли", "гункан", "запечен", "сети")):
         return True
-    return any(c in b for c in CAUTION_CUES)
+    cues = list(CAUTION_CUES)
+    if caution_kw:
+        cues.extend(caution_kw)
+    return any(c in b for c in cues)
 
 
 def drink_ok(item: dict) -> bool:
@@ -696,11 +662,17 @@ def drink_ok(item: dict) -> bool:
     return False
 
 
-def classify(item: dict, prefer_kw: list[str], avoid_kw: list[str]) -> str:
+def classify(
+    item: dict,
+    prefer_kw: list[str],
+    avoid_kw: list[str],
+    caution_kw: list[str] | None = None,
+) -> str:
     if is_merch(item) or item.get("available") is False:
         return "skip"
 
     name = norm(item.get("name"))
+    caution_kw = caution_kw or []
 
     # Condiments / add-ons are not meals
     if name.startswith("соус") or name in (
@@ -730,7 +702,6 @@ def classify(item: dict, prefer_kw: list[str], avoid_kw: list[str]) -> str:
             "риб",
             "лосос",
             "кревет",
-            "томат",
             "овоч",
             "омлет",
             "яйц",
@@ -741,31 +712,27 @@ def classify(item: dict, prefer_kw: list[str], avoid_kw: list[str]) -> str:
             "тосту",
             "тост ",
             "брускет",
+            "хек",
         )
     ):
         return "skip"
 
-    # Explicit junk names even if they look like "food"
     if any(x in name for x in ("big mac", "біг мак", "tacos", "такос")):
         return "avoid"
 
-    # Sweet breakfast dumplings etc.
-    if any(x in name for x in ("варенич", "сирник", "млинец", "млинц")):
-        return "avoid"
+    # Sweet cheese pancakes — caution, not ban
+    if any(x in name for x in ("варенич", "сирник")):
+        return "caution"
 
-    # Bar snacks that aren't a meal
     if name in ("грінки", "горішки", "начос"):
         return "avoid"
 
-    # Drinks first — don't let food avoid-keywords kill plain tea/coffee
     if is_drink(item):
         return "drink" if drink_ok(item) else "avoid"
 
     if name == "боул":
         return "caution"
     if "брускет" in name and "асорті" in name:
-        return "caution"
-    if "салат" in name and "чікен" in name:
         return "caution"
     if is_croissant(item):
         return croissant_bucket(item)
@@ -774,9 +741,19 @@ def classify(item: dict, prefer_kw: list[str], avoid_kw: list[str]) -> str:
         return "avoid"
 
     if soft_prefer(item, prefer_kw):
-        return "caution" if caution_item(item) else "eat"
+        # Tomato-forward salads — personal dislike
+        if "салат" in name and any(
+            x in name for x in ("грецьк", "томат", "помідор", "чері", "капрезе", "помідорний")
+        ):
+            return "avoid"
+        if name.startswith("снек") or "снек-" in name:
+            return "skip"
+        return "caution" if caution_item(item, caution_kw) else "eat"
 
-    # Broad healthy baseline: real food categories that aren't junk
+    # Tomato dislike — still skip tomato-forward salads when not otherwise preferred
+    if any(x in name for x in ("томат", "помідор", "чері")):
+        return "avoid"
+
     cat = norm(item.get("category")) + " " + norm(item.get("section"))
     if any(
         x in cat
@@ -795,9 +772,12 @@ def classify(item: dict, prefer_kw: list[str], avoid_kw: list[str]) -> str:
             "риб",
             "курка",
             "картопля, каша",
+            "хінкал",
+            "мангал",
+            "меню",
         )
     ):
-        return "caution" if caution_item(item) else "eat"
+        return "caution" if caution_item(item, caution_kw) else "eat"
 
     return "skip"
 
@@ -826,6 +806,7 @@ def main() -> None:
     diet = json.loads(DIET_PATH.read_text(encoding="utf-8"))
     prefer_kw = [k.lower() for k in diet["prefer"]["keywords"]]
     avoid_kw = [k.lower() for k in diet["avoid"]["keywords"]]
+    caution_kw = [k.lower() for k in (diet.get("caution") or {}).get("keywords") or []]
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
 
@@ -834,11 +815,12 @@ def main() -> None:
         stale.unlink()
 
     readme = [
-        "# Що брати (корисна база)\n\n",
+        "# Що брати (за діагнозами)\n\n",
         f"Профіль: `{diet['id']}` — {diet['name']}.\n\n",
-        "Режим ширший: не лише ідеальні боули, а **будь-яка нормальна їжа** без фритюру/солодкого/алко.\n\n",
-        "У кожному закладі: **їсти** / **з обережністю** / **пити** (+ короткі приклади чого уникати).\n\n",
-        "> Не медична рекомендація. Голодний > ідеальний. При СПК — бульйон, рис, яйце.\n",
+        "Без середземноморської дієти від лікаря. Рамка: Жільбер / нирка / СПК / гіпотиреоз + "
+        "особисте (без кави, алко, томатів). Голодний > ідеальний.\n\n",
+        "У кожному закладі: **їсти** / **з обережністю** / **пити**.\n\n",
+        "> Не медична рекомендація.\n",
         "\nПерегенерація: `python3 filter_diet_picks.py`\n",
     ]
 
@@ -852,7 +834,7 @@ def main() -> None:
         buckets: dict[str, list] = {"eat": [], "caution": [], "drink": [], "avoid": []}
 
         for it in data.get("items", []):
-            label = classify(it, prefer_kw, avoid_kw)
+            label = classify(it, prefer_kw, avoid_kw, caution_kw)
             if label == "skip":
                 continue
             entry = {
@@ -871,7 +853,7 @@ def main() -> None:
         counts = {k: len(v) for k, v in buckets.items()}
         summaries[slug] = {"place": pname, "counts": counts}
 
-        lines = [f"# {pname} — корисна база\n", f"Джерело: `{rel}`\n"]
+        lines = [f"# {pname} — за діагнозами\n", f"Джерело: `{rel}`\n"]
         if addr:
             lines.append(f"{addr}\n")
         for title, key in [
@@ -890,7 +872,6 @@ def main() -> None:
                 if e.get("description"):
                     lines.append(f"  - {e['description'][:140]}")
 
-        # Keep avoid short — full menus already list everything
         lines.append(f"\n## Краще не брати\n")
         lines.append(f"_усього відсіяно: {counts['avoid']}_\n")
         for e in buckets["avoid"][:12]:
