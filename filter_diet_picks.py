@@ -161,7 +161,6 @@ HARD_AVOID = [
     "настойк",
     "коньяк",
     "лікер",
-    "ром ",
     "вермут",
     "бурбон",
 ]
@@ -561,11 +560,17 @@ def avoid_kw_hit(blob: str, avoid_kw: list[str]) -> bool:
 def hard_avoided(item: dict, avoid_kw: list[str]) -> bool:
     b = blob_of(item)
     name = norm(item.get("name"))
+    title = " ".join(norm(item.get(k)) for k in ("name", "category", "section"))
     if fries_hit(b):
         return True
     if any(a in b for a in HARD_AVOID):
         return True
-    if avoid_kw_hit(b, avoid_kw):
+    # Tomato dislike: only hard-avoid if tomatoes are in the dish title, not a side note
+    tomato_kw = ("томат", "помідор", "чері")
+    other_avoid = [a for a in avoid_kw if a not in tomato_kw]
+    if avoid_kw_hit(b, other_avoid):
+        return True
+    if any(a in title for a in tomato_kw):
         return True
     if any(x in name for x in ("кацу", "крок", "темпур", "нагет", "флурі")):
         return True
@@ -618,6 +623,12 @@ def drink_ok(item: dict) -> bool:
             "глинт",
             "кальян",
         )
+    ):
+        return False
+    # Alcohol spirits by whole-word-ish tokens (avoid matching «гарніром»)
+    if any(
+        f" {tok} " in f" {name} " or name.startswith(tok + " ") or name.endswith(" " + tok)
+        for tok in ("ром", "джин", "віскі", "текіла")
     ):
         return False
     if any(d in name for d in DRINK_DROP):
