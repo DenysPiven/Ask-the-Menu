@@ -19,6 +19,7 @@ PLACES = {
     "ostriv": "data/ostriv.json",
     "cherrylake": "data/cherrylake.json",
     "tiflis": "data/tiflis.json",
+    "puzatahata": "data/puzatahata.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
@@ -448,6 +449,9 @@ def is_merch(item: dict) -> bool:
 def is_drink(item: dict) -> bool:
     cat = norm(item.get("category")) + " " + norm(item.get("section"))
     name = norm(item.get("name"))
+    # "Салат-фреш …" is food, not a juice
+    if "салат" in name:
+        return False
     # Alcoholic "ice tea" cocktails
     if any(x in name for x in ("long island", "long iceland", "long beach", "ice tea", "айс ті")):
         if "матча" not in name and "matcha" not in name and "кава" not in cat:
