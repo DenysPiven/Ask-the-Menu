@@ -78,6 +78,10 @@ python parse_menu.py \
   -n cherrylake
 
 python parse_menu.py https://tiflis374.choiceqr.com/online-menu -n tiflis
+
+python parse_menu.py \
+  "https://glovoapp.com/uk/ua/kyiv-right-bank/stores/puzata-hata-kie" \
+  -n puzatahata
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
