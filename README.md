@@ -86,6 +86,10 @@ python parse_menu.py \
 python parse_menu.py \
   "https://expz.menu/d0838ea9-b9ae-44dd-b99d-993f0a0206fd" \
   -n musafir
+
+python parse_menu.py \
+  "https://expz.menu/f1cda3e9-e9b4-499f-b12b-80cd83b44677" \
+  -n episode
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
