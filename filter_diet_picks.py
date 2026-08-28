@@ -21,6 +21,7 @@ PLACES = {
     "tiflis": "data/tiflis.json",
     "puzatahata": "data/puzatahata.json",
     "musafir": "data/musafir.json",
+    "episode": "data/episode.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
@@ -453,7 +454,21 @@ def is_drink(item: dict) -> bool:
             "горілк",
             "віскі",
             "коньяк",
+            "лікер",
+            "текіл",
+            "мескал",
+            "бренді",
+            "херес",
+            "портвейн",
         )
+    )
+    # Whole-word «ром» so «гарніри» / «гарніром» stay food
+    rum_as_drink = (
+        cat.strip() == "ром"
+        or cat.startswith("ром ")
+        or cat.endswith(" ром")
+        or " ром " in f" {cat} "
+        or name.startswith("ром ")
     )
     food_cat = any(
         x in cat
@@ -478,6 +493,8 @@ def is_drink(item: dict) -> bool:
         )
     )
     # "МЕНЮ" / "БАРНЕ МЕНЮ" contain "меню" — don't let that cancel drinks
+    if rum_as_drink:
+        return True
     if drink_cat and not food_cat:
         return True
     if drink_cat and any(
@@ -538,9 +555,24 @@ def fries_hit(blob: str) -> bool:
     ) or blob.strip().endswith("фрі")
 
 
+# Substring traps: keyword is inside a harmless word
+KW_FALSE_SUBSTRING = {
+    "шот": ("пашот",),  # poached egg, not a bar shot
+}
+
+
+def kw_in_blob(blob: str, kw: str) -> bool:
+    if kw not in blob:
+        return False
+    cleaned = blob
+    for fake in KW_FALSE_SUBSTRING.get(kw, ()):
+        cleaned = cleaned.replace(fake, " ")
+    return kw in cleaned
+
+
 def avoid_kw_hit(blob: str, avoid_kw: list[str]) -> bool:
     for a in avoid_kw:
-        if a not in blob:
+        if not kw_in_blob(blob, a):
             continue
         if a in ("вершков", "вершков соус") and "вершкове масло" in blob and "соус" not in blob:
             continue
@@ -563,10 +595,10 @@ def hard_avoided(item: dict, avoid_kw: list[str]) -> bool:
     title = " ".join(norm(item.get(k)) for k in ("name", "category", "section"))
     if fries_hit(b):
         return True
-    if any(a in b for a in HARD_AVOID):
+    if any(kw_in_blob(b, a) for a in HARD_AVOID):
         return True
     # Tomato dislike: only hard-avoid if tomatoes are in the dish title, not a side note
-    tomato_kw = ("томат", "помідор", "чері")
+    tomato_kw = ("томат", "помідор", "чері", "шакшук")
     other_avoid = [a for a in avoid_kw if a not in tomato_kw]
     if avoid_kw_hit(b, other_avoid):
         return True
@@ -735,6 +767,8 @@ def classify(
     # Sweet cheese pancakes — caution, not ban
     if any(x in name for x in ("варенич", "сирник")):
         return "caution"
+    if "карбонар" in name:
+        return "caution"
 
     if name in ("грінки", "горішки", "начос"):
         return "avoid"
@@ -755,7 +789,7 @@ def classify(
     if soft_prefer(item, prefer_kw):
         # Tomato-forward salads — personal dislike
         if "салат" in name and any(
-            x in name for x in ("грецьк", "томат", "помідор", "чері", "капрезе", "помідорний")
+            x in name for x in ("грецьк", "томат", "помідор", "чері", "капрезе", "помідорний", "шакшук")
         ):
             return "avoid"
         if name.startswith("снек") or "снек-" in name:
@@ -763,7 +797,7 @@ def classify(
         return "caution" if caution_item(item, caution_kw) else "eat"
 
     # Tomato dislike — still skip tomato-forward salads when not otherwise preferred
-    if any(x in name for x in ("томат", "помідор", "чері")):
+    if any(x in name for x in ("томат", "помідор", "чері", "шакшук")):
         return "avoid"
 
     cat = norm(item.get("category")) + " " + norm(item.get("section"))
