@@ -90,6 +90,10 @@ python parse_menu.py \
 python parse_menu.py \
   "https://expz.menu/f1cda3e9-e9b4-499f-b12b-80cd83b44677" \
   -n episode
+
+python parse_menu.py \
+  "https://glovoapp.com/uk/ua/vinnytsia/stores/horse-in-a-gasmask-vnt" \
+  -n horse
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
