@@ -17,6 +17,7 @@ PLACES = {
     "woods": "data/woods.json",
     "lvivcroissants": "data/lvivcroissants.json",
     "tiflis": "data/tiflis.json",
+    "horse": "data/horse.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
@@ -149,6 +150,9 @@ HARD_AVOID = [
     "вино",
     "wine",
     "beer",
+    "сидр",
+    "cider",
+    "уманськ",
     "віскі",
     "текіл",
     "джин",

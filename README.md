@@ -71,6 +71,10 @@ python parse_menu.py \
   -n lvivcroissants
 
 python parse_menu.py https://tiflis374.choiceqr.com/online-menu -n tiflis
+
+python parse_menu.py \
+  "https://glovoapp.com/uk/ua/vinnytsia/stores/horse-in-a-gasmask-vnt" \
+  -n horse
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
