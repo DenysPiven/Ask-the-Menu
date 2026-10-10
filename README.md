@@ -96,6 +96,8 @@ python parse_menu.py \
   -n horse
 
 python parse_menu.py https://bellaciaorest.choiceqr.com/menu -n bellaciao
+
+python parse_menu.py https://kultmiasa.choiceqr.com/section:menyu -n kultmiasa
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
