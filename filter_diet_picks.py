@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -17,6 +18,7 @@ PLACES = {
     "woods": "data/woods.json",
     "lvivcroissants": "data/lvivcroissants.json",
     "tiflis": "data/tiflis.json",
+    "cactus": "data/cactus.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
@@ -515,6 +517,25 @@ def is_drink(item: dict) -> bool:
         x in cat for x in ("бар", "вин", "напої", "напій", "чай", "кава", "coffee", "ігрист", "коравн", "алк")
     ):
         return True
+    # Name-only drink cues must not catch food ("фреш салат", "лате" in dish names, etc.)
+    if any(
+        x in name
+        for x in (
+            "салат",
+            "шніцел",
+            "стейк",
+            "омлет",
+            "боул",
+            "суп",
+            "паста",
+            "бургер",
+            "сендвіч",
+            "тост",
+            "котлет",
+            "страва",
+        )
+    ):
+        return False
     return any(
         k in name
         for k in (
@@ -588,12 +609,19 @@ def avoid_kw_hit(blob: str, avoid_kw: list[str]) -> bool:
     return False
 
 
+def hard_avoid_token_hit(blob: str, token: str) -> bool:
+    """Substring avoid-tokens; 'ром ' must not match inside 'чедером '."""
+    if token == "ром ":
+        return bool(re.search(r"(?<![а-яіїєґa-z])ром(?![а-яіїєґa-z])", blob))
+    return token in blob
+
+
 def hard_avoided(item: dict, avoid_kw: list[str]) -> bool:
     b = blob_of(item)
     name = norm(item.get("name"))
     if fries_hit(b):
         return True
-    if any(a in b for a in HARD_AVOID):
+    if any(hard_avoid_token_hit(b, a) for a in HARD_AVOID):
         return True
     if avoid_kw_hit(b, avoid_kw):
         return True

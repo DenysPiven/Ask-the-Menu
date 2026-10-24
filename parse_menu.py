@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Parse a restaurant menu from ChoiceQR, Expirenza, Glovo or Duck Hub into JSON + Markdown."""
+"""Parse a restaurant menu from ChoiceQR, Expirenza, Glovo, Duck Hub or Poster into JSON + Markdown."""
 
 from __future__ import annotations
 
@@ -781,6 +781,140 @@ def parse_duckhub(http: requests.Session, url: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
+# Poster / menu.ps.me / joinposter
+# ---------------------------------------------------------------------------
+
+POSTER_KCAL_RE = re.compile(
+    r"(?:калорійність|kcal)[^\d≈~]*[≈~]?\s*(\d+)\s*ккал|≈\s*(\d+)\s*ккал|(\d+)\s*ккал",
+    re.IGNORECASE,
+)
+
+
+def is_poster(url: str, html: str = "") -> bool:
+    host = urlparse(url).netloc.lower()
+    if host in {"menu.ps.me", "ps.me"} or host.endswith(".ps.me"):
+        return True
+    if "joinposter.com" in host or "postershop.me" in host:
+        return True
+    return bool(html) and 'id="menu-data"' in html and 'id="settings-data"' in html
+
+
+def poster_account_url(url: str) -> str:
+    parsed = urlparse(url)
+    parts = [p for p in parsed.path.split("/") if p]
+    if not parts:
+        return f"{parsed.scheme}://{parsed.netloc}/"
+    return f"{parsed.scheme}://{parsed.netloc}/{parts[0]}/"
+
+
+def poster_place_name(shop_name: str) -> str:
+    raw = re.sub(r"[_\s]+", " ", (shop_name or "").strip())
+    if not raw:
+        return "Poster"
+    low = raw.casefold()
+    if "cactus" in low:
+        return "Cactus Coffee"
+    return raw
+
+
+def poster_contact(settings: dict[str, Any], icon: str) -> str:
+    for row in settings.get("contacts") or []:
+        if (row or {}).get("icon") == icon:
+            return str((row or {}).get("link") or (row or {}).get("title") or "").strip()
+    return ""
+
+
+def poster_kcal(description: str) -> int | None:
+    if not description:
+        return None
+    match = POSTER_KCAL_RE.search(description)
+    if not match:
+        return None
+    for group in match.groups():
+        if group:
+            return int(group)
+    return None
+
+
+def parse_poster(http: requests.Session, url: str) -> dict[str, Any]:
+    clean = poster_account_url(url)
+    response = http.get(clean, timeout=TIMEOUT)
+    response.raise_for_status()
+    soup = BeautifulSoup(response.text, "html.parser")
+    settings_node = soup.find(id="settings-data")
+    menu_node = soup.find(id="menu-data")
+    if not settings_node or not menu_node or not settings_node.string or not menu_node.string:
+        raise ParseError("Poster: немає #settings-data / #menu-data")
+    try:
+        settings = json.loads(settings_node.string)
+        raw_items = json.loads(menu_node.string)
+    except json.JSONDecodeError as exc:
+        raise ParseError(f"Poster: битий JSON у сторінці ({exc})") from exc
+    if not isinstance(raw_items, list):
+        raise ParseError("Poster: menu-data не список")
+
+    currency = ((settings.get("currency") or {}).get("symbol")) or "₴"
+    items: list[dict[str, Any]] = []
+    for raw in raw_items:
+        name = html_text((raw or {}).get("name"))
+        if not name:
+            continue
+        category = html_text((raw or {}).get("categoryName")) or "Меню"
+        parent = html_text((raw or {}).get("parentCategoryName"))
+        section = parent or category
+        description = html_text((raw or {}).get("description"))
+        tags = []
+        for tag in (raw or {}).get("tags") or []:
+            if isinstance(tag, dict) and tag.get("name"):
+                tags.append(str(tag["name"]))
+            elif isinstance(tag, str) and tag:
+                tags.append(tag)
+        weight = "за 100 г" if (raw or {}).get("isWeight") else None
+        items.append(
+            {
+                "id": (raw or {}).get("productId"),
+                "section": section,
+                "category": category,
+                "name": name,
+                "description": description,
+                "price": money_uah((raw or {}).get("price"), kopecks=False),
+                "weight": weight,
+                "available": True,
+                "allergens": [],
+                "tags": tags,
+                "kcal": poster_kcal(description),
+                "options": [],
+            }
+        )
+    if not items:
+        raise ParseError("У Poster не знайдено позицій меню")
+
+    phone = poster_contact(settings, "phone")
+    if phone.lower().startswith("tel:"):
+        phone = phone[4:].strip()
+    instagram = poster_contact(settings, "instagram")
+    address = str(settings.get("address") or "").strip()
+
+    return {
+        "source": "poster",
+        "url": clean,
+        "fetched_at": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "place": {
+            "name": poster_place_name(str(settings.get("shopName") or "")),
+            "type": "cafe",
+            "address": address,
+            "city": "Смодна" if "смодн" in address.casefold() else "",
+            "phone": phone,
+            "instagram": instagram,
+            "currency": currency,
+            "account_hash": settings.get("accountHash") or "",
+        },
+        "hours": [],
+        "items": items,
+    }
+
+
+# ---------------------------------------------------------------------------
 # Markdown
 # ---------------------------------------------------------------------------
 
@@ -850,23 +984,27 @@ def detect_and_parse(http: requests.Session, url: str, lang: str) -> dict[str, A
         return parse_glovo(http, url)
     if "duck-hub.com" in urlparse(url).netloc.lower():
         return parse_duckhub(http, url)
+    if is_poster(url):
+        return parse_poster(http, url)
 
     response = http.get(url, timeout=TIMEOUT)
     response.raise_for_status()
     html = response.text
     if is_choiceqr(html, url):
         return parse_choiceqr(http, url)
+    if is_poster(url, html):
+        return parse_poster(http, url)
     if expirenza_restaurant_id(url):
         return parse_expirenza(http, url, lang)
     raise ParseError(
         "Не впізнано джерело. Підтримуються ChoiceQR, Expirenza (expz.menu), "
-        "Glovo (glovoapp.com) та Duck Hub (*.duck-hub.com)."
+        "Glovo (glovoapp.com), Duck Hub (*.duck-hub.com) та Poster (menu.ps.me)."
     )
 
 
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
-        description="Парсить меню ChoiceQR, Expirenza, Glovo або Duck Hub у data/<name>.json та .md"
+        description="Парсить меню ChoiceQR, Expirenza, Glovo, Duck Hub або Poster у data/<name>.json та .md"
     )
     parser.add_argument("url", help="URL цифрового меню")
     parser.add_argument("-n", "--name", required=True, help="ім'я файлів у data/, напр. miro")
