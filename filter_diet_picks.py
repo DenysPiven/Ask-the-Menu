@@ -25,6 +25,8 @@ PLACES = {
     "horse": "data/horse.json",
     "bellaciao": "data/bellaciao.json",
     "kultmiasa": "data/kultmiasa.json",
+    "cactus": "data/cactus.json",
+    "noa": "data/noa.json",
 }
 
 # Extra healthy cues beyond diet.json keywords

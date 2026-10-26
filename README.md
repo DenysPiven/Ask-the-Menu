@@ -1,6 +1,6 @@
 # Ask the Menu
 
-Парсер цифрових меню і підказка «що поїсти». Меню закладів — з публічних сторінок ChoiceQR, Expirenza, Glovo і Duck Hub. Сільпо — окремо, через офіційний MCP (магазин, не заклад).
+Парсер цифрових меню і підказка «що поїсти». Меню закладів — з публічних сторінок ChoiceQR, Expirenza, Glovo, Duck Hub і Poster. Сільпо — окремо, через офіційний MCP (магазин, не заклад).
 
 ## Що вміє
 
@@ -15,6 +15,7 @@
 | **Expirenza** (`expz.menu`) | [LongShot](https://expz.menu/order/921775e1-69a8-496d-8739-0293dd0cdcf5/menu?menuId=20141&tableCode=QZ2EJ) — JSON з `static.shaketopay.com.ua/menu/prod/cache/menu/<restaurantId>/uk/` |
 | **Glovo** | [McDonald's Вінниця](https://glovoapp.com/uk/ua/vinnytsia/stores/mcdonald-s-vnt) |
 | **Duck Hub** | [Woods Вінниця](https://woods.duck-hub.com/menu) |
+| **Poster** (`menu.ps.me`) | [Cactus Coffee Смодна](https://menu.ps.me/RODprrOTxJA/) — JSON у `#menu-data` / `#settings-data` |
 
 У репозиторії вже є зліпки:
 
@@ -98,6 +99,12 @@ python parse_menu.py \
 python parse_menu.py https://bellaciaorest.choiceqr.com/menu -n bellaciao
 
 python parse_menu.py https://kultmiasa.choiceqr.com/section:menyu -n kultmiasa
+
+python parse_menu.py https://menu.ps.me/RODprrOTxJA/ -n cactus
+
+python parse_menu.py \
+  "https://glovoapp.com/uk/ua/lviv/stores/noa-guest-emily-lvi" \
+  -n noa
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
