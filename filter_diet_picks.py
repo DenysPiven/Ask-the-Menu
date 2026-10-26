@@ -17,6 +17,7 @@ PLACES = {
     "woods": "data/woods.json",
     "lvivcroissants": "data/lvivcroissants.json",
     "tiflis": "data/tiflis.json",
+    "noa": "data/noa.json",
 }
 
 # Extra healthy cues beyond diet.json keywords
