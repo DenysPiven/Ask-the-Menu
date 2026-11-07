@@ -105,6 +105,10 @@ python parse_menu.py https://menu.ps.me/RODprrOTxJA/ -n cactus
 python parse_menu.py \
   "https://glovoapp.com/uk/ua/lviv/stores/noa-guest-emily-lvi" \
   -n noa
+
+python parse_menu.py \
+  "https://restoraciya-nova-provinciya.choiceqr.com/menu" \
+  -n novaprovinciya
 ```
 
 Для ChoiceQR скрипт проходить усі розділи закладу (сніданки, меню, напої, бар…), не лише той, що в URL.
