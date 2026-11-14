@@ -75,7 +75,7 @@ python parse_menu.py \
   -n lvivcroissants
 
 python parse_menu.py \
-  "https://cherrylakevn.choiceqr.com/section:menyu" \
+  "https://cherrylakevn.choiceqr.com/section:menyu-240" \
   -n cherrylake
 
 python parse_menu.py https://tiflis374.choiceqr.com/online-menu -n tiflis
