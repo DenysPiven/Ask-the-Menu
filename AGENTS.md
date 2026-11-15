@@ -12,3 +12,8 @@
 
 - Desktop / цей репозиторій: `.cursor/mcp.json`
 - **Cloud Agent цей сервер сам не підхоплює.** Його треба додати в [cursor.com/agents](https://cursor.com/agents) → MCP → HTTP URL `https://mcp.silpo.ua/mcp`, потім OAuth (телефон + OTP). Після логіну в цьому чаті з’являться tools `silpo_*`.
+
+## Git
+
+- Коміти від імені `Denys Piven <denys.piven.my@gmail.com>`. Агент себе ніде не згадує: ні в авторі, ні в `Co-Authored-By`, ні в посиланнях на сесію, ні в тексті коміту.
+- Одразу в `master` і `git push origin master`. Без pull request і без feature-гілок (див. `.cursor/rules/git-workflow.mdc`).
