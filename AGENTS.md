@@ -15,5 +15,5 @@
 
 ## Git
 
-- Коміти від імені `Denys Piven <denys.piven.my@gmail.com>`. Агент себе ніде не згадує: ні в авторі, ні в `Co-Authored-By`, ні в посиланнях на сесію, ні в тексті коміту.
+- Коміти від імені `Denys Piven <pivden2000@gmail.com>`. Агент себе ніде не згадує: ні в авторі, ні в `Co-Authored-By`, ні в посиланнях на сесію, ні в тексті коміту.
 - Одразу в `master` і `git push origin master`. Без pull request і без feature-гілок (див. `.cursor/rules/git-workflow.mdc`).
