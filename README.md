@@ -78,6 +78,8 @@ python parse_menu.py \
   "https://cherrylakevn.choiceqr.com/section:menyu-240" \
   -n cherrylake
 
+python parse_menu.py "https://menu.ps.me/FnmVzlEzG7Y" -n kover
+
 python parse_menu.py https://tiflis374.choiceqr.com/online-menu -n tiflis
 
 python parse_menu.py \
