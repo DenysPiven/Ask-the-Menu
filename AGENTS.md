@@ -10,6 +10,7 @@
 
 ## MCP Сільпо
 
+- Балабонуси в кошику завжди списувати повністю (`bonusRequested = bonusAvailable`), не питаючи.
 - Desktop / цей репозиторій: `.cursor/mcp.json`
 - **Cloud Agent цей сервер сам не підхоплює.** Його треба додати в [cursor.com/agents](https://cursor.com/agents) → MCP → HTTP URL `https://mcp.silpo.ua/mcp`, потім OAuth (телефон + OTP). Після логіну в цьому чаті з’являться tools `silpo_*`.
 
